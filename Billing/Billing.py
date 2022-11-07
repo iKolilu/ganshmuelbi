@@ -39,7 +39,7 @@ def truck_get(id):
 def bill_get(id):
   return "Not implemented"
 
-@app.route("/health", methods="GET")
+@app.route("/health", methods=["GET"])
 def health():
   return "Not implemented"
 
