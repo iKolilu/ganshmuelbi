@@ -30,7 +30,11 @@ def rates_get():
 
 @app.route("/rates", methods=["POST"])
 def rates_create():
-  return "Not implemented"
+
+  new_rate = request.json.get('rate')
+  rate_id = db.create_provider(new_rate)
+  return jsonify({"id": rate_id, "name": new_rate})
+  
     
 @app.route("/truck", methods=["POST"])
 def truck_create():
