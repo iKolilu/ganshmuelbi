@@ -36,7 +36,10 @@ def session(id):
 
 @app.route("/health", methods="GET")
 def health():
-    return "Not implemented"
+    if db.engine.execute('SELECT 1'):
+        return make_response("OK", 200)
+    else:
+        return make_response("Failure", 500)
 
 
 if __name__ == '__main__':
