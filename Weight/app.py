@@ -54,8 +54,7 @@ def internal_server_error(error):
 
 @ app.route("/")
 def home():
-    # return "Welcome to the Gan Shmuel Weight"
-    return render_template("file_upload_form.html")
+    return "Welcome to the Gan Shmuel Weight"
 
 
 @ app.route("/weigth", methods=["GET", "POST"])
@@ -117,9 +116,6 @@ def unknown():
 @app.route("/item/<id>", methods=["GET"])
 def item(id):
     return "Not implemented"
-
-
-<< << << < HEAD
 
 
 @ app.route("/session")
