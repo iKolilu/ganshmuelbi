@@ -63,7 +63,7 @@ def weight():
     return "Not implemented"
 
 
-@ app.route("/batch-weight/<filename>", methods=["POST"])
+@app.route("/batch-weight", methods=["POST"])
 def batch_weight():
     body = request.get_json()
     weight_data = []
@@ -109,14 +109,17 @@ def batch_weight():
     })
 
 
-@ app.route("/unknown", methods=["GET"])
+@app.route("/unknown", methods=["GET"])
 def unknown():
     return "Not implemented"
 
 
-@ app.route("/item/<id>", methods=["GET"])
+@app.route("/item/<id>", methods=["GET"])
 def item(id):
     return "Not implemented"
+
+
+<< << << < HEAD
 
 
 @ app.route("/session")
@@ -136,8 +139,12 @@ def session(id=None):
 
 @ app.route("/health", methods=["GET"])
 def health():
-    return "Not implemented"
+   if db.engine.execute('SELECT 1'):
+        return make_response("OK", 200)
+    else:
+        return make_response("Failure", 500)
+
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug = True, host='0.0.0.0', port=7007)
