@@ -5,6 +5,7 @@ from flask import Flask, jsonify, make_response, render_template, request
 from library import get_date_range, make_error, make_success
 from remote import get_item_from_weights
 
+import csv
 app = Flask(__name__)
 database = db.connect()
 
@@ -33,6 +34,10 @@ def rates_create():
 
   new_rate = request.json.get('rate')
   rate_id = db.create_provider(new_rate)
+
+
+
+  
   return jsonify({"id": rate_id, "name": new_rate})
   
     

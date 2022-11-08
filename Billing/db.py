@@ -20,9 +20,15 @@ def connect():
 def get_provider(connection, id):
   return "Not implemented"
 
+def get_rates_by_id(id):
+  sql = "SELECT * FROM Rates WHERE id=" + id + ";"
+  # val = 
+  return "Not implemented"
+
+
+
 def create_provider(connection, name):
   cursor = connection.cursor()
-
   sql = "INSERT INTO Provider (id, name) VALUES (%s, %s);"
   val = (None, name)
   cursor.execute(sql, val)
