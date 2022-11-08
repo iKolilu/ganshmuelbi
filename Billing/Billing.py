@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request
+import db
+from flask import Flask, jsonify, make_response, render_template, request
 
 app = Flask(__name__)
 
@@ -6,14 +7,17 @@ app = Flask(__name__)
 def home():
   return "Welcome to the Gan Shmuel Billing"
 
-
 @app.route("/provider", methods=["POST"])
 def provider_create():
-  return "Not implemented"
+  new_name = request.json.get('name')
+  provider_id = db.create_provider(new_name)
+  return jsonify({"id": provider_id})
 
-@app.route("/provider", methods=["PUT"])
-def provider_update():
-  return "Not implemented"
+@app.route("/provider/<id>", methods=["PUT"])
+def provider_update(id):
+  new_name = request.json.get('name')
+  db.update_provider(id, new_name)
+  return jsonify({"id": id, "name": new_name})
 
 @app.route("/rates", methods=["GET"])
 def rates_get():
@@ -41,7 +45,10 @@ def bill_get(id):
 
 @app.route("/health", methods=["GET"])
 def health():
-  return "Not implemented"
+  if db.connect():
+    return make_response("OK", 200)
+    
+  return make_response("Failure", 500)
 
 if __name__ == '__main__':
   app.run()
