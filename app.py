@@ -5,7 +5,7 @@ app = Flask('__main__',template_folder='templates')
 
 @app.route("/")
 def home():
-    return "Welcome to the Gan Shmuel"
+    return "Welcome to the Gan Shmuel Server"
 
 
 if __name__ == '__main__':
