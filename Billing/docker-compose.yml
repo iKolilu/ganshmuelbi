@@ -1,0 +1,17 @@
+version: '3.1'
+services:
+  app:
+    build: . 
+    command: 'sh -c "sleep 10 ; python3 /app/Billing.py"'
+    ports:
+      - 8000:5000
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_DATABASE: billdb
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./sqldata:/docker-entrypoint-initdb.d
