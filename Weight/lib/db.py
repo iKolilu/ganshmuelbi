@@ -19,14 +19,11 @@ class db:
             print(i)
         return 'success'
 
-    def create_table(self, table_name, parameters_string):
-        pass
-
     def add_truck_in(self, truck, containers, direction, bruto, produce, neto=None, truckTara=None):
         now = datetime.now().strftime('%Y%m%d%H%M%S')
-        if neto == None:
+        if neto == None or neto == '':
             neto = 'null'
-        if truckTara == None:
+        if truckTara == None or truckTara == '':
             truckTara = 'null'
         # print(now)
         self.db_cursor.execute(
@@ -73,6 +70,10 @@ class db:
         }
 
     def none_handle_container(self, c_id, weight, unit):
+        self.db_cursor.execute(
+            f"insert into transactions(datetime, direction, truck, containers, bruto, truckTara, neto, produce) values('{datetime.now().strftime('%Y%m%d%H%M%S')}', 'none', NULL, '{c_id}',NULL, NULL, NULL, NULL, NULL);"
+        )
+
         if not self.does_container_exists(c_id):
             added = self.none_add_container(c_id, weight, unit)
             return added
@@ -137,9 +138,30 @@ class db:
             return True
         return False
 
+    def does_truck_or_container_exist_in_db(self, id):
+        self.db_cursor.execute(
+            f"SELECT id FROM transactions WHERE (truck = '{id}') OR (containers LIKE '%{id}%')"
+        )
+
+        rows = self.db_cursor.fetchall()
+
+        if len(rows) > 0:
+            return True
+        return False
+
     def does_container_exists(self, cont_id):
         self.db_cursor.execute(
             f"SELECT * FROM containers_registered WHERE container_id = '{cont_id}'"
+        )
+        rows = self.db_cursor.fetchall()
+
+        if len(rows) > 0:
+            return True
+        return False
+
+    def does_container_exists_in_transactions(self, cont_id):
+        self.db_cursor.execute(
+            f"SELECT * FROM transactions WHERE containers LIKE '%{cont_id}%'"
         )
         rows = self.db_cursor.fetchall()
 
@@ -176,8 +198,27 @@ class db:
         if f_ == None or f_ == '':
             f_ = 'in,out,none'
 
+        f_final = f_.split(',')
+        f_query_string = ''
+        for idx, el in enumerate(f_final):
+            if idx == 0:
+                f_query_string = f"(direction LIKE '%{el}%')"
+            else:
+                f_query_string = f_query_string + \
+                    f" OR (direction LIKE '%{el}%')"
+        f_query_string = "(" + f_query_string + ")"
+        f_query_string = f" AND {f_query_string}"
+
+        #print(f_, f_final, f_query_string)
+
+        try:
+            if f_ == None or f_ == '':
+                f_query_string = ''
+        except:
+            pass
+
         out_already = self.db_cursor.execute(
-            "SELECT * FROM transactions WHERE truckTara is Null")
+            f"SELECT * FROM transactions WHERE truckTara is Null AND (datetime > '{from_}' AND datetime < '{to_}'){f_query_string}")
         #"SELECT * FROM transactions WHERE neto is Null OR truckTara is Null"
         rows = self.db_cursor.fetchall()
         # print(rows)
@@ -186,53 +227,31 @@ class db:
             message = 'Some trucks are not out yet, please wait ...'
 
         neto_already = self.db_cursor.execute(
-            "SELECT * FROM transactions WHERE neto is Null")
+            f"SELECT * FROM transactions WHERE neto is Null AND (datetime > '{from_}' AND datetime < '{to_}'){f_query_string}")
         rows = self.db_cursor.fetchall()
         # print(rows)
         if len(rows) > 0:
             status_code = 206
             message = message + '\nMake Sure to calculate all neto before using data ...'
 
-        f_final = f_.split(',')
-        f_query_string = ''
-        for idx, el in enumerate(f_final):
-            if idx == 0:
-                f_query_string = f"(containers LIKE '%{el}%')"
-            else:
-                f_query_string = f_query_string + \
-                    f" OR (containers LIKE '%{el}%')"
-        f_query_string = "(" + f_query_string + ")"
-
         self.db_cursor.execute(
-            f"SELECT * FROM transactions WHERE (datetime > '{from_}' AND datetime < '{to_}') AND {f_query_string}")
+            f"SELECT * FROM transactions WHERE (datetime > '{from_}' AND datetime < '{to_}'){f_query_string}")
         rows = self.db_cursor.fetchall()
 #            print('WEIGHTS', rows)
         results = [self.transaction_objectify(i) for i in rows]
         # results['']
-        return [results, status_code, message]
+        return [[self.format_get_weight(i) for i in results], status_code, message]
 
-#         if len(f_final) == 3:
-#             self.db_cursor.execute(
-#                 f"SELECT * FROM transactions WHERE (datetime > '{from_}' AND datetime < '{to_}') AND ((containers LIKE '%{f_final[0]}%') OR (containers LIKE '%{f_final[1]}%') OR (containers LIKE '%{f_final[2]}%'))")
-#             rows = self.db_cursor.fetchall()
-# #            print('WEIGHTS', rows)
-#             results = [self.transaction_objectify(i) for i in rows]
-#             return results
-
-#         elif len(f_final) == 2:
-#             self.db_cursor.execute(
-#                 f"SELECT * FROM transactions WHERE (datetime > '{from_}' AND datetime < '{to_}') AND ((containers LIKE '%{f_final[0]}%') OR (containers LIKE '%{f_final[1]}%'))")
-#             rows = self.db_cursor.fetchall()
-# #            print('WEIGHTS', rows)
-#             results = [self.transaction_objectify(i) for i in rows]
-#             return results
-#         elif len(f_final) == 1:
-#             self.db_cursor.execute(
-#                 f"SELECT * FROM transactions WHERE (datetime > '{from_}' AND datetime < '{to_}') AND (containers LIKE '%{f_final[0]}%')")
-#             rows = self.db_cursor.fetchall()
-# #            print('WEIGHTS', rows)
-#             results = [self.transaction_objectify(i) for i in rows]
-#             return results
+    def format_get_weight(self, res):
+        # print(res)
+        return {
+            'id': res['id'],
+            'direction': res['direction'],
+            'bruto': res['bruto'],
+            'neto': res['neto'],
+            'produce': res['produce'],
+            'containers': res['containers'].split(",")
+        }
 
     def get_container_weights(self, from_, to_, f_):
         f_query_string = ""
@@ -261,3 +280,210 @@ class db:
         # results['']
         print(results)
         return results
+
+    def get_unknowns(self):
+        self.db_cursor.execute(
+            f"SELECT container_id FROM containers_registered WHERE weight IS NULL"
+        )
+        rows = self.db_cursor.fetchall()
+        print(rows)
+
+        return [i[0] for i in rows]
+
+    def get_item_truck(self, id, from_, to_):
+        if from_ == None or from_ == '':
+            date_today = datetime.now()
+            from_ = date_today.replace(
+                day=1, hour=0, minute=0, second=0, microsecond=0).strftime('%Y%m%d%H%M%S')
+        else:
+            from_ = datetime.strptime(from_, '%Y%m%d%H%M%S')
+        if to_ == None or to_ == '':
+            to_ = datetime.now().strftime('%Y%m%d%H%M%S')
+        else:
+            to_ = datetime.strptime(to_, '%Y%m%d%H%M%S')
+
+        last_known_tara = self.last_known_tara(id, from_, to_)
+        if last_known_tara == 'na':
+            return []
+        truck_sesions = self.get_item_truck_sessions(id, from_, to_)
+        if truck_sesions == []:
+            return []
+
+        return {
+            'id': id,
+            'tara': last_known_tara,
+            'sessions': truck_sesions
+        }
+
+    def get_item_truck_sessions(self, id, from_, to_):
+        self.db_cursor.execute(
+            f"SELECT id FROM transactions WHERE (truck = '{id}') AND (datetime > '{from_}' AND datetime < '{to_}')"
+        )
+        rows = self.db_cursor.fetchall()
+
+        return [i[0] for i in rows]
+
+    def last_known_tara(self, id, from_, to_):
+        self.db_cursor.execute(
+            f"SELECT truckTara FROM transactions WHERE (truck = '{id}') AND (datetime > '{from_}' AND datetime < '{to_}') ORDER BY id DESC LIMIT 1"
+        )
+        row = self.db_cursor.fetchall()
+        if not len(row) > 0:
+            row = ['na']
+        return row[0]
+
+    def get_item_container(self, id, from_, to_):
+        if from_ == None or from_ == '':
+            date_today = datetime.now()
+            from_ = date_today.replace(
+                day=1, hour=0, minute=0, second=0, microsecond=0).strftime('%Y%m%d%H%M%S')
+        else:
+            from_ = datetime.strptime(from_, '%Y%m%d%H%M%S')
+        if to_ == None or to_ == '':
+            to_ = datetime.now().strftime('%Y%m%d%H%M%S')
+        else:
+            to_ = datetime.strptime(to_, '%Y%m%d%H%M%S')
+
+        last_known_tara = self.last_known_tara_container(id)
+        container_sesions = self.get_item_container_sessions(id, from_, to_)
+
+        if last_known_tara == 'na' and container_sesions == []:
+            return []
+
+        return {
+            'id': id,
+            'tara': last_known_tara,
+            'sessions': container_sesions
+        }
+
+    def last_known_tara_container(self, id):
+        self.db_cursor.execute(
+            f"SELECT weight, unit FROM containers_registered WHERE container_id = '{id}'"
+        )
+        rows = self.db_cursor.fetchall()
+        print(rows)
+        if not len(rows) > 0:
+            return 'na'
+        return f'{rows[0][0]} {rows[0][1]}'
+
+    def get_item_container_sessions(self, id, from_, to_):
+        self.db_cursor.execute(
+            f"SELECT id FROM transactions WHERE (containers LIKE '%{id}%') AND (datetime > '{from_}' AND datetime < '{to_}')"
+        )
+        rows = self.db_cursor.fetchall()
+
+        return [i[0] for i in rows]
+
+    def session_exists(self, id):
+        self.db_cursor.execute(
+            f"SELECT id FROM transactions WHERE id = {id}"
+        )
+        row = self.db_cursor.fetchall()
+        if len(row) > 0:
+            return True
+        return False
+
+    def get_session(self, id):
+        self.db_cursor.execute(
+            f"SELECT * FROM transactions WHERE id = {id}"
+        )
+        rows = self.db_cursor.fetchone()
+        #print('session', rows)
+        results = {}
+        results['id'] = id
+
+        truck = rows[3]
+        #print('truck', truck)
+        if truck == '' or truck == None:
+            truck = 'na'
+        results['truck'] = truck
+
+        results['bruto'] = rows[5]
+
+        direction = rows[2]
+        if direction == 'out':
+            results['truckTara'] = rows[6]
+            results['neto'] = self.session_neto(rows[4], rows[5], rows[6])
+
+        return results
+
+    def session_neto(self, cont_ids, bruto, truckTara):
+        sum_of_conts = 0
+        #print('c_ids', cont_ids)
+        cont_ids_split = cont_ids.split(',')
+
+        for cont in cont_ids_split:
+            #print('c', cont)
+
+            self.db_cursor.execute(
+                f"SELECT * FROM containers_registered WHERE container_id = '{cont}'"
+            )
+            row = self.db_cursor.fetchone()
+            print('specific container', row)
+            try:
+                if row[2] == 'kg':
+                    sum_of_conts = sum_of_conts + row[1]
+                else:
+                    sum_of_conts = sum_of_conts + (row[1]*0.453592)
+            except:
+                return 'na'
+
+        return bruto - truckTara - sum_of_conts
+
+    def batch_weight_handler(self, df, clm, multiplier):
+
+        # for ind, row in df.iterrows():
+        #     print(
+        #         f"id: {row[id]} weight: {row[clm['weight']]}")
+        batch_result = []
+        for i in range(len(df)):
+            #print(df.loc[i, "id"], df.loc[i, f"{clm['weight']}"])
+            batch_result.append(self.batch_weight_handle_containers(id=df.loc[i, "id"],
+                                                                    weight_in_kg=df.loc[i,
+                                                                                        f"{clm['weight']}"]*multiplier))
+            # else:
+            #     batch_error += self.batch_weight_handle_trucks(id=df.loc[i, "id"],
+            #                                                    weight_in_kg=df.loc[i, f"{clm['weight']}"]*multiplier)
+
+        # if batch_error == 0:
+        #     print(batch_error)
+        #     return 'success'
+        return batch_result
+
+    def batch_weight_handle_containers(self, id, weight_in_kg, unit='kg'):
+        exists = self.does_container_exists(cont_id=id)
+        if exists:
+            # update db
+            self.db_cursor.execute(
+                f"UPDATE containers_registered SET weight = {weight_in_kg}, unit = '{unit}' WHERE container_id = '{id}'")
+            self.db.commit()
+
+            if self.db_cursor.rowcount == 1:
+                print(self.db_cursor.rowcount)
+                print('batch container updated')
+
+            else:
+                print(self.db_cursor.rowcount)
+                print('couldnt commit batch container')
+
+        else:
+            # add to db
+            self.db_cursor.execute(
+                f"INSERT INTO containers_registered(container_id, weight, unit) values('{id}', {weight_in_kg}, '{unit}')")
+            self.db.commit()
+            if self.db_cursor.rowcount == 1:
+                print(self.db_cursor.rowcount)
+                print('batch container added')
+
+            else:
+                print(self.db_cursor.rowcount)
+                print('couldnt commit batch container')
+
+        return {
+            'id': id,
+            'weight': weight_in_kg,
+            'unit': unit
+        }
+
+    def batch_weight_handle_trucks(self, id, weight_in_kg):
+        return 0

@@ -1,5 +1,8 @@
-from flask import Flask, render_template, request, Response, jsonify
+from flask import Flask, render_template, request, Response, jsonify, abort
 from lib.db import db
+import os
+import mimetypes as mt
+import pandas as pd
 
 base = db(
     host='localhost', port=8877,
@@ -16,38 +19,42 @@ def home():
     return "Welcome to the Gan Shmuel Weight"
 
 
-@app.route("/weight/<id>/", methods=["GET"])
-def get_weight(id):
-    print(id)
+@app.route("/weight/", methods=["GET"])
+def get_weight():
+    # print(id)
     from_ = request.args.get('from')
     to_ = request.args.get('to')
     f_ = request.args.get('filter')
 
-    initials = id.split('-')[0]
-    print(initials)
-    retrieval = []
-    if initials.lower() == 't' or initials.lower() == 'k':
-        print('truck')
-        retrieval = base.get_truck_weights(from_=from_, to_=to_, f_=f_)
-        if retrieval[1] == 200:
-            return jsonify(
-                {
-                    'data': retrieval[0]
-                    # TODO sessions
-                }
-            )
-        else:
-            return jsonify(
-                {
-                    'data': retrieval[0],
-                    'warning': retrieval[2]
-                    # TODO sessions
-                }
-            ), retrieval[1]
-    elif initials.lower() == 'c':
-        conts = base.get_container_weights(from_=None, to_=None, f_=f_)
-        return jsonify(conts), 200
-    return Response('error', 200)
+    # initials = id.split('-')[0]
+    # print(initials)
+    # retrieval = []
+    # if initials.lower() == 't' or initials.lower() == 'k' or initials.lower() == 'c':
+    #     #print('truck')
+    retrieval = base.get_truck_weights(from_=from_, to_=to_, f_=f_)
+    if retrieval[1] == 200:
+        return jsonify(retrieval[0])
+        # jsonify(
+        #     {
+        #         'data': retrieval[0]
+        #         # TODO sessions
+        #     }
+        # )
+    else:
+        return jsonify(retrieval[0])
+        # return jsonify(
+        #     {
+        #         'data': retrieval[0],
+        #         'warning': retrieval[2]
+        #         # TODO sessions
+        #     }
+        # ), retrieval[1]
+    # elif initials.lower() == 'c':
+    #     conts = base.get_container_weights(from_=None, to_=None, f_=f_)
+    #     return jsonify(conts), 200
+    # else:
+    #     abort(Respo)
+    return Response('error', 400)
 
 
 @app.route('/weight/', methods=["POST"])
@@ -141,27 +148,98 @@ def weight():
 
 @app.route("/batch-weight/", methods=["POST"])
 def batch_weight():
-    return "Not implemented"
+    args = request.get_json()
+    filename = args['file']
+    path = f'/in/{filename}'
+    path = os.path.normpath(path)
+    df = None
+    multiplier = 1.0
+    columns = {
+        'id': 'id'
+    }
+
+    if filename == None or filename == '':
+        abort(Response('Provide valide file', 400))
+
+    if not (os.path.exists(path) and os.path.isfile(path)):
+        abort(Response('Provide valide file', 400))
+
+    if mt.guess_type(path)[0] == 'application/json':
+        df = pd.read_json(path)
+        columns['weight'] = 'weight'
+        if df['unit'].loc[0] == 'lbs':
+            multiplier = 0.453592
+
+        results = base.batch_weight_handler(df, columns, multiplier)
+        return jsonify(results), 200
+
+    elif mt.guess_type(path)[0] == 'text/csv':
+        df = pd.read_csv(path)
+        columns['weight'] = df.columns[1]
+        if df.columns[1] == 'lbs':
+            multiplier = 0.453592
+
+        results = base.batch_weight_handler(df, columns, multiplier)
+        return jsonify(results), 200
+    else:
+        abort(Response('Provide valide file', 400))
 
 
-@app.route("/unknown", methods=["GET"])
+@app.route("/unknown/", methods=["GET"])
 def unknown():
-    return "Not implemented"
+    # Returns a list of all recorded containers that have unknown weight
+    unknowns = base.get_unknowns()
+    return jsonify(unknowns), 200
 
 
-@app.route("/item/<id>", methods=["GET"])
+@app.route("/item/<id>/", methods=["GET"])
 def item(id):
-    return "Not implemented"
+    from_ = request.args.get('from')
+    to_ = request.args.get('to')
+
+    try:
+        T_or_C = id.split('-')[0].lower()
+    except:
+        return Response('error', 400)
+
+    # if T_or_C == 't' or T_or_C == 'k':
+        # truck stuff
+    exists = base.does_truck_or_container_exist_in_db(id)
+    if not exists:
+        return Response('resource not available', 404)
+
+    results = base.get_item_truck(id, from_=from_, to_=to_)
+    if results == []:
+        results = base.get_item_container(id, from_, to_)
+        if results == []:
+            return Response('resource not available', 404)
+    return jsonify(results)
+    # else:
+    #     exists = base.does_truck_exist_in_db(
+    #         id) or base.does_container_exists_in_transactions(id)
+    #     if not exists:
+    #         return Response('resource not available', 404)
+    #     results = base.get_item_container(id, from_, to_)
+    #     if results == []:
+    #         return Response('resource not available', 404)
+    #     return jsonify(results)
+
+    # container stuff
 
 
-@app.route("/session/<id>", methods=["GET"])
+@app.route("/session/<id>/", methods=["GET"])
 def session(id):
-    return "Not implemented"
+
+    exists = base.session_exists(id)
+    if not exists:
+        return Response('session not available', 404)
+    results = base.get_session(id)
+    return jsonify(results)
 
 
-@app.route("/health", methods=["GET"])
+@app.route("/health/", methods=["GET"])
 def health():
-    return "Not implemented"
+    return Response('Okay', 200)
 
 
 if __name__ == '__main__':
