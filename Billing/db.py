@@ -20,10 +20,50 @@ def connect():
 def get_provider(connection, id):
   return "Not implemented"
 
-def get_rates_by_id(id):
-  sql = "SELECT * FROM Rates WHERE id=" + id + ";"
-  # val = 
-  return "Not implemented"
+
+def get_one_rate(product_id, scope):
+  sql = "SELECT * FROM Rates WHERE product_id = %s AND scope = %s;"
+  val = (product_id, scope)
+
+  mycursor.execute(sql, val)
+  myresult = mycursor.fetchall()
+
+  print(myresult)
+  return myresult  
+
+def get_all_rates(product_id):
+  sql = "SELECT * FROM Rates;"
+
+  mycursor.execute(sql)
+  myresult = mycursor.fetchall()
+
+  print(myresult)
+  return myresult
+
+
+def create_rates(product_id, rate, scope):
+  sql = "INSERT INTO Rates (product_id, rate, scope) VALUES (%s, %s, %s);"
+  val = (product_id, rate, scope)
+  mycursor.execute(sql, val)
+  mydb.commit()
+
+  print(mycursor.lastrowid)
+
+  return mycursor.lastrowid
+
+
+
+def update_rates_same_pid_scope(product_id, rate, scope):
+  sql = "UPDATE Rates SET rate=%s WHERE product_id = %s AND scope = %s ";
+
+  # sql = "UPDATE Rates SET rate=%s WHERE scope = %s ";
+  val = (rate, product_id, scope)
+  mycursor.execute(sql, val)
+  mydb.commit()
+
+  print(mycursor.lastrowid) 
+
+  return mycursor.lastrowid
 
 
 

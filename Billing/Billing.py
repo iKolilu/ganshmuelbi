@@ -29,16 +29,46 @@ def provider_update(id):
 def rates_get():
   return "Not implemented"
 
+
+
 @app.route("/rates", methods=["POST"])
 def rates_create():
 
-  new_rate = request.json.get('rate')
-  rate_id = db.create_provider(new_rate)
+  # new_rate = request.json.get('rate')
+  # rate_id = db.create_provider(new_rate)
 
+  # new_rate = db.update_rates_same_pid_scope("late", 45, "All")
 
+  # new_rate = db.create_rates("lat", 21, "All")
+
+  # new_rate = db.get_one_rate("lat", "Alx")
 
   
-  return jsonify({"id": rate_id, "name": new_rate})
+  newDict = [
+    {"product_id": "lat", "rate": 21, "scope": "All"},
+    {"product_id": "late","rate": 45, "scope": "All"},
+    { "product_id": "only","rate": 47,"scope": "45"}
+  ]
+
+  count = 0
+
+  # first check if it exists db.get_one_rate("lat", "Alx") ,  empty [] means does not exists
+  # if no then db.create_rates, or 
+  # else  db.update_rates_same_pid_scope("late", 45, "All")
+
+  new_rate=""
+  for x in newDict:
+    count = count + 1
+    print(x, count)
+
+    if db.get_one_rate(x["product_id"], x["scope"]):
+      print(x, "found one ===> ")
+      new_rate = db.update_rates_same_pid_scope(x["product_id"], x["rate"], x["scope"])
+    else:
+      new_rate = db.create_rates(x["product_id"], x["rate"], x["scope"])
+
+
+  return jsonify({"id": "32", "name": new_rate})
   
     
 @app.route("/truck", methods=["POST"])
@@ -88,4 +118,4 @@ def health():
   return make_response("Failure", 500)
 
 if __name__ == '__main__':
-  app.run(debug=True, host='0.0.0.0')
+  app.run(debug=True, host='0.0.0.0', port=4000)
