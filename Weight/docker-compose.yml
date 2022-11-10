@@ -1,0 +1,38 @@
+---
+version: "3.9"
+
+services:
+  mysqldb:
+    image: mysql:8
+    volumes: 
+      - db-data:/var/lib/mysql
+      - ./dump:/data
+    expose:
+      - "3306"
+    restart: always
+    environment:
+      - ${MYSQL_ROOT_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "mysqldb"]
+      timeout: 20s
+      retries: 10
+
+  app:
+    build: .
+    volumes: 
+      - $PWD/in:/in
+    expose:
+      - "9090"
+    ports:
+      - 3000:9090
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+
+volumes:
+  db-data:
+
+networks:
+  default:
+    name: weight_default
+    external: true

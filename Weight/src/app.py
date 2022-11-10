@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flask import Flask, render_template, request, Response, jsonify, abort, redirect, url_for, flash
 from lib.db import db
 import os
@@ -5,40 +7,12 @@ import mimetypes as mt
 import pandas as pd
 
 base = db(
-    host='localhost', port=8877,
-    username='root', password='password',
+    host='mysqldb', port=3306,
+    username='root', password='123@admin',
     database='weight'
 )
 
 app = Flask('__main__', template_folder='templates')
-
-
-# mydb = mysql.connector.connect(
-#     host="localhost",
-#     user="crommie",
-#     password="123@admin"
-# )
-
-# sesssion_record = [
-#     {"id": "1",
-#      "truck": "GT-2852-11",
-#      "bruto": 45.4,
-#      "truckTara": 45.12,
-#      "neto": 40.1
-#      },
-#     {"id": "2",
-#      "truck": "CR-116-17",
-#      "bruto": 80,
-#      "truckTara": 70,
-#      "neto": 65
-#      },
-#     {"id": "3",
-#      "truck": "GT-15-U",
-#      "bruto": 20,
-#      "truckTara": 18,
-#      "neto": 15
-#      }
-# ]
 
 
 @app.errorhandler(404)
@@ -288,4 +262,4 @@ def health():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=9090, host="0.0.0.0", debug=True)
