@@ -5,6 +5,8 @@ from flask import Flask, jsonify, make_response, render_template, request
 from library import get_date_range, make_error, make_success
 from remote import get_item_from_weights
 
+import openpyxl
+
 import csv
 app = Flask(__name__)
 database = db.connect()
@@ -31,41 +33,60 @@ def rates_get():
 
 
 
+
 @app.route("/rates", methods=["POST"])
 def rates_create():
 
   # new_rate = request.json.get('rate')
-  # rate_id = db.create_provider(new_rate)
-
-  # new_rate = db.update_rates_same_pid_scope("late", 45, "All")
-
-  # new_rate = db.create_rates("lat", 21, "All")
-
-  # new_rate = db.get_one_rate("lat", "Alx")
-
   
-  newDict = [
-    {"product_id": "lat", "rate": 21, "scope": "All"},
-    {"product_id": "late","rate": 45, "scope": "All"},
-    { "product_id": "only","rate": 47,"scope": "45"}
-  ]
+              
+  dataframe = openpyxl.load_workbook("in/krates_copy.xlsx")
+  dataframe1 = dataframe.active
+  
+  testArray = []
+  # Iterate the loop to read the cell values
+  for row in range(1, dataframe1.max_row):
+    
+    testDict={}
+    for col in dataframe1.iter_cols(1, dataframe1.max_column):
+      
+      if col[0].value == "Scope":
+        testDict[col[0].value] = str(col[row].value)
+      elif col[0].value == "Product":
+        testDict[col[0].value] = str(col[row].value)    
+      else:
+        testDict[col[0].value] = int( col[row].value )
+
+
+    testArray.append(testDict)  
+  
+  print(testArray)
+
+  ##############################################
+  # newDict = [
+  #   {"Product": "lat", "Rate": 21, "Scope": "All"},
+  #   {"Product": "late","Rate": 45, "Scope": "All"},
+  #   { "Product": "only","Rate": 47,"Scope": "45"},
+  #   { "Product": "lat","Rate": 147,"Scope": "All"}
+  # ]
+  ###################################################
 
   count = 0
 
-  # first check if it exists db.get_one_rate("lat", "Alx") ,  empty [] means does not exists
-  # if no then db.create_rates, or 
-  # else  db.update_rates_same_pid_scope("late", 45, "All")
-
-  new_rate=""
-  for x in newDict:
+  new_rate=None
+  for x in testArray:
     count = count + 1
-    print(x, count)
+    # print(x, count)
 
-    if db.get_one_rate(x["product_id"], x["scope"]):
+    if db.get_one_rate(x["Product"], x["Scope"]) != []:
       print(x, "found one ===> ")
-      new_rate = db.update_rates_same_pid_scope(x["product_id"], x["rate"], x["scope"])
+
+      # new_rate = db.update_rates_same_pid_scope_navel( x["Rate"] )
+      new_rate = db.update_rates_same_pid_scope(x["Product"], x["Rate"], x["Scope"])
     else:
-      new_rate = db.create_rates(x["product_id"], x["rate"], x["scope"])
+      new_rate = db.create_rates(x["Product"], x["Rate"], x["Scope"])
+
+###############################################
 
 
   return jsonify({"id": "32", "name": new_rate})
