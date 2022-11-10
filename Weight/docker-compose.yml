@@ -29,6 +29,8 @@ services:
     depends_on:
       mysqldb:
         condition: service_healthy
+volume:
+  db-data:  
 networks:
   default:
     name: weight_default
