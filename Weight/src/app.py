@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flask import Flask, render_template, request, Response, jsonify, abort, redirect, url_for, flash
 from lib.db import db
 import os
@@ -5,8 +7,8 @@ import mimetypes as mt
 import pandas as pd
 
 base = db(
-    host='localhost', port=8877,
-    username='root', password='password',
+    host='mysqldb', port=3306,
+    username='root', password='123@admin',
     database='weight'
 )
 
@@ -288,4 +290,4 @@ def health():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=9090, host="0.0.0.0", debug=True)
