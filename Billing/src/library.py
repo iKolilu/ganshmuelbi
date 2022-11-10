@@ -9,6 +9,11 @@ def make_error(code, message = "an error occurred"):
 def make_success(data):
   return make_response(jsonify(data), 200)
 
+def get_date_format_text(date) :
+  format = "%Y%m%d%H%M%S"
+  return datetime.strftime(date, format)
+
+
 def get_date_range(_from, _to) :
   now = datetime.now()
   format = "%Y%m%d%H%M%S"
@@ -27,3 +32,12 @@ def get_date_range(_from, _to) :
   # print(f"date to -> {date_to}")
 
   return {"from": date_from, "to": date_to}
+
+def get_provider_id_long(int_provider_id):
+  return int(int_provider_id) + 10000
+
+def get_provider_id_short(str_provider_id):
+  val = int(str_provider_id) - 10000
+  if val > 0:
+    return val
+  return int(str_provider_id)
