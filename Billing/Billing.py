@@ -8,7 +8,6 @@ from remote import get_item_from_weights
 from werkzeug.utils import secure_filename
 
 import os
-import pandas as pd
 import openpyxl
 
 import csv
@@ -18,6 +17,10 @@ database = db.connect()
 @app.route("/")
 def home():
   return render_template("index.html")
+
+@app.route("/test_route")
+def test_route():
+  return jsonify({'message': 'Hello, world!'})
 
 @app.route("/provider", methods=["POST"])
 def provider_create():
@@ -41,10 +44,6 @@ def rates_get():
 
   return send_file(dir_name, mimetype='xlsx')
 
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route("/rates", methods=["POST"])
@@ -133,4 +132,4 @@ def health():
   return make_response("Failure", 500)
 
 if __name__ == '__main__':
-  app.run(debug=True, host='0.0.0.0', port=4000)
+  app.run(debug=True, host='0.0.0.0', port=5000)
