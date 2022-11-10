@@ -5,6 +5,8 @@ from flask import Flask, jsonify, make_response, render_template, request, send_
 from library import get_date_range, make_error, make_success
 from remote import get_item_from_weights
 
+from werkzeug.utils import secure_filename
+
 import os
 import pandas as pd
 import openpyxl
@@ -15,7 +17,7 @@ database = db.connect()
 
 @app.route("/")
 def home():
-  return "Welcome to the Gan Shmuel Billing"
+  return render_template("index.html")
 
 @app.route("/provider", methods=["POST"])
 def provider_create():
@@ -34,12 +36,34 @@ def provider_update(id):
 @app.route("/rates", methods=["GET"])
 def rates_get():
 
-  # print(os.path.dirname("static/xlsx"))
   
-  dir_name = os.path.join("static", 'excel_files', 'krates_copy.xlsx')
+  dir_name = os.path.join("in", 'rates.xlsx')
 
   return send_file(dir_name, mimetype='xlsx')
 
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/post_rates', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('download_file', name=filename))
 
 
 
@@ -90,7 +114,6 @@ def rates_create():
     if db.get_one_rate(x["Product"], x["Scope"]) != []:
       print(x, "found one ===> ")
 
-      # new_rate = db.update_rates_same_pid_scope_navel( x["Rate"] )
       new_rate = db.update_rates_same_pid_scope(x["Product"], x["Rate"], x["Scope"])
     else:
       new_rate = db.create_rates(x["Product"], x["Rate"], x["Scope"])
@@ -101,6 +124,8 @@ def rates_create():
   return jsonify({"id": "32", "name": new_rate})
   
     
+
+
 @app.route("/truck", methods=["POST"])
 def truck_create():
   number_plate = request.json.get('number_plate')
