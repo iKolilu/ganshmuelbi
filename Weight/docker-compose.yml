@@ -9,7 +9,6 @@ services:
       - ./dump:/data
     expose:
       - "3306"
-    restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=123@admin
       - MYSQL_DATABASE=weight
