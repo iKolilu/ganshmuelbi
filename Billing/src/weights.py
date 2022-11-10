@@ -40,22 +40,3 @@ def get_weight(date_range):
     raise Exception('weight server error')
 
   return r.json()
-
-  # f = out
-  mock = { 
-    "id": 'asdf1',
-    "direction": "out",
-    "bruto": 603,
-    "neto": 234,
-    "produce": "Grapefruit",
-    "containers": [ "asdf1", "asdf2", "asdf3" ],
-  }
-  mock2 = { 
-    "id": 'asdf3',
-    "direction": "out",
-    "bruto": 603,
-    "neto": 234,
-    "produce": "Grapefruit",
-    "containers": [ "asdf1", "asdf2", "asdf3" ],
-  }
-  return [mock, mock2]
