@@ -15,7 +15,7 @@ services:
     image: mysql:8.0
     environment:
       MYSQL_DATABASE: weight
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: 123@admin
     volumes:
       - ./dump:/docker-entrypoint-initdb.d
       
