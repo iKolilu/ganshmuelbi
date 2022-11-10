@@ -6,12 +6,14 @@ services:
     image: mysql:8
     volumes: 
       - db-data:/var/lib/mysql
-      - ./dump:/data
+      - ./dump/weightdb.sql:/docker-entrypoint-initdb.d/weightdb.sql
     expose:
       - "3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=123@admin
-      - MYSQL_DATABASE=weight
+      - MYSQL_ROOT_PASSWORD:123@admin
+      - MYSQL_USER: dbuser
+      - MYSQL_DATABASE:weight
+      - MYSQL_PASSWORD: userpass
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "mysqldb"]
       timeout: 20s
