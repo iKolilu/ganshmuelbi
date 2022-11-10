@@ -5,7 +5,6 @@ services:
   mysqldb:
     image: mysql:8
     volumes: 
-      - db-data:/var/lib/mysql
       - ./dump:/docker-entry-point-initdb.d/
 
     expose:
