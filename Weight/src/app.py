@@ -15,34 +15,6 @@ base = db(
 app = Flask('__main__', template_folder='templates')
 
 
-# mydb = mysql.connector.connect(
-#     host="localhost",
-#     user="crommie",
-#     password="123@admin"
-# )
-
-# sesssion_record = [
-#     {"id": "1",
-#      "truck": "GT-2852-11",
-#      "bruto": 45.4,
-#      "truckTara": 45.12,
-#      "neto": 40.1
-#      },
-#     {"id": "2",
-#      "truck": "CR-116-17",
-#      "bruto": 80,
-#      "truckTara": 70,
-#      "neto": 65
-#      },
-#     {"id": "3",
-#      "truck": "GT-15-U",
-#      "bruto": 20,
-#      "truckTara": 18,
-#      "neto": 15
-#      }
-# ]
-
-
 @app.errorhandler(404)
 def resouce_not_found(error):
     return jsonify({
