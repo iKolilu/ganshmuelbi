@@ -29,10 +29,13 @@ def provider_update(id):
   db.update_provider(database, id, new_name)
   return make_success({"id": id, "name": new_name})
 
+
+
 @app.route("/rates", methods=["GET"])
 def rates_get():
+
+  # print(os.path.dirname("static/xlsx"))
   
-  print(os.path.dirname("static/xlsx"))
   dir_name = os.path.join("static", 'excel_files', 'krates_copy.xlsx')
 
   return send_file(dir_name, mimetype='xlsx')
