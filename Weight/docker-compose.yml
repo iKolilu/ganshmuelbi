@@ -7,12 +7,14 @@ services:
     volumes: 
       - db-data:/var/lib/mysql
       - ./dump:/docker-entry-point-initdb.d/
+
     expose:
       - "3306"
-    restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=123@admin
+      - MYSQL_USER=dbuser
       - MYSQL_DATABASE=weight
+      - MYSQL_PASSWORD=userpass
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "mysqldb"]
       timeout: 20s
