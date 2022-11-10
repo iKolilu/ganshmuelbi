@@ -11,7 +11,7 @@ services:
     depends_on:
       - mysql
 
-  mysql:
+  mysqldb:
     image: mysql:8.0
     environment:
       MYSQL_DATABASE: weight
