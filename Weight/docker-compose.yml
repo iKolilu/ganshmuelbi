@@ -6,7 +6,7 @@ services:
     image: mysql:8
     volumes: 
       - db-data:/var/lib/mysql
-      - ./dump:/data
+      - ./dump:/docker-entry-point-initdb.d/
     expose:
       - "3306"
     restart: always
