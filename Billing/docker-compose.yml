@@ -4,6 +4,7 @@ services:
     build: . 
     volumes:
       - .:/app
+      - ./in:/in
     command: 'sh -c "sleep 15 ; python3 /app/Billing.py"'
     ports:
       - 8000:5000
