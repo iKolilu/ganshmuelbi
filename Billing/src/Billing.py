@@ -12,7 +12,7 @@ import openpyxl
 
 import csv
 app = Flask(__name__)
-database = db.connect()
+
 
 @app.route("/")
 def home():
@@ -48,7 +48,7 @@ def rates_get():
 
 @app.route("/rates", methods=["POST"])
 def rates_create():
-
+  database = db.connect()
   try:      
     dataframe = openpyxl.load_workbook("in/rates.xlsx")
     dataframe1 = dataframe.active
