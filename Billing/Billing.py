@@ -70,58 +70,38 @@ def upload_file():
 @app.route("/rates", methods=["POST"])
 def rates_create():
 
-  # new_rate = request.json.get('rate')
-  
-              
-  dataframe = openpyxl.load_workbook("in/krates_copy.xlsx")
-  dataframe1 = dataframe.active
-  
-  testArray = []
-  # Iterate the loop to read the cell values
-  for row in range(1, dataframe1.max_row):
+  try:      
+    dataframe = openpyxl.load_workbook("in/rates.xlsx")
+    dataframe1 = dataframe.active
     
-    testDict={}
-    for col in dataframe1.iter_cols(1, dataframe1.max_column):
+    testArray = []
+    # Iterate the loop to read the cell values
+    for row in range(1, dataframe1.max_row):
       
-      if col[0].value == "Scope":
-        testDict[col[0].value] = str(col[row].value)
-      elif col[0].value == "Product":
-        testDict[col[0].value] = str(col[row].value)    
+      testDict={}
+      for col in dataframe1.iter_cols(1, dataframe1.max_column):
+        
+        if col[0].value == "Scope":
+          testDict[col[0].value] = str(col[row].value)
+        elif col[0].value == "Product":
+          testDict[col[0].value] = str(col[row].value)    
+        else:
+          testDict[col[0].value] = int( col[row].value )
+
+      testArray.append(testDict)  
+    
+    for x in testArray:
+
+      if db.get_one_rate(x["Product"], x["Scope"]) != []:
+        print(x, "found one ===> ")
+        db.update_rates_same_pid_scope(x["Product"], x["Rate"], x["Scope"])
       else:
-        testDict[col[0].value] = int( col[row].value )
+        db.create_rates(x["Product"], x["Rate"], x["Scope"])
 
+    return jsonify({"status_code": 200, "success": "true"})
 
-    testArray.append(testDict)  
-  
-  print(testArray)
-
-  ##############################################
-  # newDict = [
-  #   {"Product": "lat", "Rate": 21, "Scope": "All"},
-  #   {"Product": "late","Rate": 45, "Scope": "All"},
-  #   { "Product": "only","Rate": 47,"Scope": "45"},
-  #   { "Product": "lat","Rate": 147,"Scope": "All"}
-  # ]
-  ###################################################
-
-  count = 0
-
-  new_rate=None
-  for x in testArray:
-    count = count + 1
-    # print(x, count)
-
-    if db.get_one_rate(x["Product"], x["Scope"]) != []:
-      print(x, "found one ===> ")
-
-      new_rate = db.update_rates_same_pid_scope(x["Product"], x["Rate"], x["Scope"])
-    else:
-      new_rate = db.create_rates(x["Product"], x["Rate"], x["Scope"])
-
-###############################################
-
-
-  return jsonify({"id": "32", "name": new_rate})
+  except:
+    return jsonify({"status_code": 400, "success": "false"})    
   
     
 
