@@ -1,10 +1,12 @@
 
 
 import db
-from flask import Flask, jsonify, make_response, render_template, request
+from flask import Flask, jsonify, make_response, render_template, request, send_file
 from library import get_date_range, make_error, make_success
 from remote import get_item_from_weights
 
+import os
+import pandas as pd
 import openpyxl
 
 import csv
@@ -29,7 +31,11 @@ def provider_update(id):
 
 @app.route("/rates", methods=["GET"])
 def rates_get():
-  return "Not implemented"
+  
+  print(os.path.dirname("static/xlsx"))
+  dir_name = os.path.join("static", 'excel_files', 'krates_copy.xlsx')
+
+  return send_file(dir_name, mimetype='xlsx')
 
 
 
