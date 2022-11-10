@@ -11,7 +11,7 @@ services:
       - "3306"
     restart: always
     environment:
-      - ${MYSQL_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=123@admin
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "mysqldb"]
       timeout: 20s
