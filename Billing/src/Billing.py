@@ -1,17 +1,17 @@
 
 
-import db
-from flask import Flask, jsonify, make_response, render_template, request, send_file
-from library import get_date_range, make_error, make_success
-from remote import get_item_from_weights
+import os
 
+import db
+import openpyxl
+import weights as weight_server
+from flask import (Flask, jsonify, make_response, render_template, request,
+                   send_file)
+from library import get_date_range, make_error, make_success
 from werkzeug.utils import secure_filename
 
-import os
-import openpyxl
-
-import csv
 app = Flask(__name__)
+database = db.connect()
 
 
 @app.route("/")
@@ -38,9 +38,7 @@ def provider_update(id):
 
 @app.route("/rates", methods=["GET"])
 def rates_get():
-
-  
-  dir_name = os.path.join("in", 'rates.xlsx')
+  dir_name = os.path.join("/in", 'rates.xlsx')
 
   return send_file(dir_name, mimetype='xlsx')
 
@@ -48,9 +46,8 @@ def rates_get():
 
 @app.route("/rates", methods=["POST"])
 def rates_create():
-  database = db.connect()
-  try:      
-    dataframe = openpyxl.load_workbook("in/rates.xlsx")
+  try:
+    dataframe = openpyxl.load_workbook("/in/rates.xlsx")
     dataframe1 = dataframe.active
     
     testArray = []
@@ -71,16 +68,15 @@ def rates_create():
     
     for x in testArray:
 
-      if db.get_one_rate(x["Product"], x["Scope"]) != []:
-        print(x, "found one ===> ")
-        db.update_rates_same_pid_scope(x["Product"], x["Rate"], x["Scope"])
+      if db.get_one_rate(database, x["Product"], x["Scope"]) != []:
+        db.update_rates_same_pid_scope(database, x["Product"], x["Rate"], x["Scope"])
       else:
-        db.create_rates(x["Product"], x["Rate"], x["Scope"])
+        db.create_rates(database, x["Product"], x["Rate"], x["Scope"])
 
-    return jsonify({"status_code": 200, "success": "true"})
+    return make_success({"status_code": 200, "success": "true"})
 
   except:
-    return jsonify({"status_code": 400, "success": "false"})    
+    return make_error(400, 'Bad request')
   
     
 
@@ -113,16 +109,89 @@ def truck_get(id):
   if not truck:
     return make_error(404, 'not found')
 
-  truck_data = get_item_from_weights(id, dates)
+  truck_data = weight_server.get_item(id, dates)
 
   if not truck_data:
     return make_error(404, 'not found')
 
   return make_success(truck_data)
 
-@app.route("/bill/<id>", methods=["GET"])
-def bill_get(id):
-  return "Not implemented"
+@app.route("/bill/<provider_id>", methods=["GET"])
+def bill_get(provider_id):
+  try:
+    _from = request.args.get('from')
+    _to = request.args.get('to')
+    dates = get_date_range(_from, _to)
+
+    print(f"dates -> {dates}")
+    
+    # find provider
+    provider = db.get_provider(database, provider_id)
+    print(f"provider -> {provider}")
+    if provider == None:
+      return make_error(400, 'provider does not exist')
+
+  # # ! test
+    # try:
+    #   return weight_server.get_item(provider_id, dates)
+    # except:
+    #   pass
+  #   rate = db.get_rate_for_product(database, '10044', 'Mandarin')
+  #   print(f"rate -> {rate}")
+  #   return make_success(rate)
+  # # ! test
+
+    # get trucks
+    trucks = db.get_truck_for_provider(database, provider_id)
+    print(f"trucks -> {trucks}")
+
+    #  get session IDs for trucks
+    sessions = []
+    for truck in trucks:
+      truck_data = weight_server.get_item(truck[0], dates)
+      for sess in truck_data['sessions']:
+        sessions.append(sess)
+
+
+    # get weights, and filter sessions
+    weights = weight_server.get_weight(dates)
+
+    products = {}
+    print(f"sess -> {weights}")
+    for sess in weights:
+
+      if sess['id'] in sessions:
+        rate = db.get_rate_for_product(database, provider_id, sess['produce'])
+
+        # if products[sess['produce']] == None:
+        if sess['produce'] in products.keys():
+          products[sess['produce']]['count'] += 1
+        else:
+          prod = {
+            "product": sess['produce'],
+            "count": 1,
+            "amount": sess['neto'],
+            "rate": rate,
+            "pay": sess['neto'] * rate,
+          }
+          products[sess['produce']] = prod
+      
+
+    result = {
+      "id": provider_id,
+      "name": provider[1],
+      "from": dates['from'],
+      "to": dates['to'],
+      "truckCount": len(trucks),
+      "sessionCount": len(sessions),
+      "products": list(products.values()),
+      "total": 0 # ! TODO
+    }
+
+    return make_success(result)
+    
+  except Exception as e:
+    return make_error(500, str(e))
 
 @app.route("/health", methods=["GET"])
 def health():
@@ -132,4 +201,4 @@ def health():
   return make_response("Failure", 500)
 
 if __name__ == '__main__':
-  app.run(debug=True, host='0.0.0.0', port=5000)
+  app.run(host='0.0.0.0', port=5000)

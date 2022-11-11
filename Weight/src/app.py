@@ -5,6 +5,7 @@ from lib.db import db
 import os
 import mimetypes as mt
 import pandas as pd
+
 #database base
 base = db(
     host='mysqldb', port=3306,
@@ -78,6 +79,11 @@ def get_weight():
 
 @app.route('/weight/', methods=["POST"])
 def weight():
+    base = db(
+    host='mysqldb', port=3306,
+    username='root', password='123@admin',
+    database='weight'
+   )
     args = request.get_json()
     direction = args['direction'].lower()
     try:
