@@ -13,10 +13,10 @@ services:
         condition: service_healthy
 
   mysqldb:
-    image: mysql:8
+    image: mysql:5.6
     volumes:
       - db-data:/var/lib/mysql
-      - ./dump:/docker-entrypoint-initdb.d/:ro
+      - ./dump:/docker-entrypoint-initdb.d:ro
     expose:
       - "3306"
     restart: always
