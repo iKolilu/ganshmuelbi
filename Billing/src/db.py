@@ -6,10 +6,10 @@ def connect():
   connection = None
   try:
     connection = mysql.connector.connect(
-      host="mysql",
+      host="localhost",
       port=3306,
       user="root",
-      password="password",
+      password="",
       database="billdb"
     )
     print("MySQL Database connection successful")

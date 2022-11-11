@@ -18,6 +18,10 @@ database = db.connect()
 def home():
   return render_template("index.html")
 
+@app.route("/ui")
+def ui():
+  return render_template("ui.html")
+
 @app.route("/test_route")
 def test_route():
   return jsonify({'message': 'Hello, world!'})
@@ -201,4 +205,4 @@ def health():
   return make_response("Failure", 500)
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=5000)
+  app.run(host='0.0.0.0', port=4000)

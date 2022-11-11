@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing App</title>
+    <!-- <script src="jquery-3.6.0.min.js"></script>  -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> 
+</head>
+<body class="bg-gray-400">   
+    <div class="max-w-2xl mx-auto rounded-lg bg-white p-16">
+        <!-- providers info -->
+            <div class="grid gap-6 mb-6 lg:grid-cols-2">
+                <form action="" method="">
+                    <div>
+                        <label for="first_name" class="font-semibold text-lg text-gray-800 leading-tight mb-5">Provider name</label>
+
+                        <input type="text" id="create_provider_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="input provider's name" required>
+
+                        <button type="button" onclick="createProvider()" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">SUBMIT</button>
+                    </div>
+                </form>
+
+                <!-- Upadate provider info -->
+                <form action="" method="">
+                    <div>
+                        <label for="first_name" class="font-semibold text-lg text-gray-800 leading-tight mb-5">Update Provider name</label>
+        
+                        <input type="text" id="update_provider_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="PROVIDER ID" required>
+
+                        <input type="text" id="update_provider_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="PORVIDER NAME" required>
+        
+                        <button type="submit" id="updateProvider" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">EDIT</button>
+                    </div>
+                </form>
+            </div>
+            <hr>
+            <!-- Rates info -->
+            <div class="rates">
+                <form action="" method="">
+                    <div class="">
+                        <label for="first_name" class="font-semibold text-lg text-gray-800 leading-tight mb-5">Upload Rates file</label>
+
+                        <input type="file" id="rate-file" placeholder="choose file" required>
+                        
+                        <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">UPLOAD</button>
+                    </div>
+                </form>
+                <br><hr>
+
+                <!-- Download rates file -->
+                <form action="" method="">
+                    <div class="">
+                        <label for="first_name" class="font-semibold text-lg text-gray-800 leading-tight mb-5">Download file</label>
+                        <button type="" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">DOWNLOAD</button>
+                    </div>
+                </form>
+            </div>
+            <br><hr>
+            <!-- trucks -->
+            <div class="grid gap-6 mb-6 lg:grid-cols-2">
+                <form action="" method="">
+                    <div class="" >
+                        <!-- create trucks -->
+                        <label for="first_name" class="font-semibold text-lg text-gray-800 leading-tight mb-5">Create truck data</label>
+
+                        <input type="text" id="first_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="license Plate" required>
+                        
+                        <input type="text" id="first_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Provider ID" required>
+
+                        <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">SUBMIT</button>
+                    </div>
+                </form>
+
+                <!-- truck upadates -->
+                <form action="" method="">               
+                    <div>
+                        <label for="first_name" class="font-semibold text-lg text-gray-800 leading-tight mb-5">Update truck data</label>
+                        <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="license plate" required>
+                        <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="provider id" required>
+                        <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">EDIT</button>
+                    </div>
+                </form>
+            </div>
+            <br><hr>
+
+            <div>
+
+                <!-- get truck data with tables -->
+                <form action="">
+                    <div>
+                        <!-- get truck -->
+                        <label>get trucks data</label>
+                        <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Liscence plate" required>
+                        <input type="date" id="datemax" name="datemax" max="1979-12-31">
+                        <label for="datemin">Enter a date after 2000-01-01:</label>
+                        <input type="date" id="datemin" name="datemin" min="2000-01-02">
+                    </div>
+                    <table>
+
+                        
+                    </table>
+                </form>
+            </div>
+            <hr>
+    </div>
+
+    <script>
+    //const server_host = "http://104.154.189.213:8080";
+    const server_host = "http://127.0.0.1:4000";
+
+    function createProvider() {
+        const p_name =  $('#create_provider_name').val()
+
+        if(!p_name) {
+            alert('Enter a valid provider name')
+            return
+        }
+        $.ajax({
+            url: `${server_host}/provider`,
+            method: 'POST',
+            data: JSON.stringify({'name': p_name}), 
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json'
+            }).done(function(data, textStatus, jqXHR) {
+                console.log('done', data);
+                alert('Provider has been created. ID is ' + data.id)
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                //if (jqXHR.responseJSON) {
+                console.log('failed',textStatus);
+                alert('Failed to create provider')
+            })
+    }
+
+    // update provider info
+    function updateProvider() {
+        const p_name =  $('#update_provider_name').val()
+
+        const p_name_id =  $('#update_provider_id').val()
+
+        if(!p_name) {
+            alert('Enter a valid provider name')
+            return
+        }
+
+        if(!p_name_id) {
+            alert('Enter a valid provider id')
+            return
+        }
+        $.ajax({
+            url: `${server_host}/provider/${p_name_id}`,
+            method: 'PUT',
+            data: JSON.stringify({'name': p_name}), 
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json'
+            }).done(function(data, textStatus, jqXHR) {
+                console.log('done', data);
+                alert('Provider has been created. ID is ' + data.id)
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                //if (jqXHR.responseJSON) {
+                console.log('failed',textStatus);
+                alert('Failed to create provider')
+            })
+    }
+    </script>
+</body>
+
+</html>
