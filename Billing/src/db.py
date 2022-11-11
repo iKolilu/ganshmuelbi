@@ -1,4 +1,5 @@
 import mysql.connector
+from library import get_provider_id_long, get_provider_id_short
 
 
 def connect():
@@ -18,54 +19,78 @@ def connect():
   return connection
 
 def get_provider(connection, id):
-  return "Not implemented"
+  cursor = connection.cursor()
+  sql = "SELECT * FROM Provider WHERE id = %s;"
+  val = (id,)
+  cursor.execute(sql, val)
+  myresult = cursor.fetchone()
+
+  return myresult
 
 
-def get_one_rate(product_id, scope):
+def get_one_rate(connection, product_id, scope):
+  cursor = connection.cursor()
   sql = "SELECT * FROM Rates WHERE product_id = %s AND scope = %s;"
   val = (product_id, scope)
 
-  mycursor.execute(sql, val)
-  myresult = mycursor.fetchall()
+  cursor.execute(sql, val)
+  myresult = cursor.fetchall()
 
   print(myresult)
   return myresult  
 
-def get_all_rates(product_id):
+def get_all_rates(connection, product_id):
+  cursor = connection.cursor()
   sql = "SELECT * FROM Rates;"
 
-  mycursor.execute(sql)
-  myresult = mycursor.fetchall()
+  cursor.execute(sql)
+  myresult = cursor.fetchall()
 
-  print(myresult)
   return myresult
 
 
-def create_rates(product_id, rate, scope):
+def create_rates(connection, product_id, rate, scope):
+  cursor = connection.cursor()
   sql = "INSERT INTO Rates (product_id, rate, scope) VALUES (%s, %s, %s);"
   val = (product_id, rate, scope)
-  mycursor.execute(sql, val)
-  mydb.commit()
+  cursor.execute(sql, val)
+  connection.commit()
 
-  print(mycursor.lastrowid)
+  print(cursor.lastrowid)
 
-  return mycursor.lastrowid
+  return cursor.lastrowid
 
 
 
-def update_rates_same_pid_scope(product_id, rate, scope):
+def update_rates_same_pid_scope(connection, product_id, rate, scope):
+  cursor = connection.cursor()
   sql = "UPDATE Rates SET rate=%s WHERE product_id = %s AND scope = %s ";
 
   # sql = "UPDATE Rates SET rate=%s WHERE scope = %s ";
   val = (rate, product_id, scope)
-  mycursor.execute(sql, val)
-  mydb.commit()
+  cursor.execute(sql, val)
+  connection.commit()
 
-  print(mycursor.lastrowid) 
+  print(cursor.lastrowid) 
 
-  return mycursor.lastrowid
+  return cursor.lastrowid
 
+def get_rate_for_product(connection, provider_id, product):
+  cursor = connection.cursor()
+  sql = "SELECT * FROM Rates WHERE product_id = %s AND scope = %s;"
+  val = (product, get_provider_id_short(provider_id))
+  
+  cursor.execute(sql, val)
+  rate = cursor.fetchone()
 
+  if rate == None:
+    sql = "SELECT * FROM Rates WHERE product_id = %s AND scope = 'All';"
+    val = (product,)
+    
+    cursor.execute(sql, val)
+    rate = cursor.fetchone()
+
+  return rate[1]
 
 def create_provider(connection, name):
   cursor = connection.cursor()
@@ -93,6 +118,14 @@ def get_truck(connection, number_plate):
   val = (number_plate,)
   cursor.execute(sql, val)
   return cursor.fetchone()
+
+def get_truck_for_provider(connection, provider_id):
+  cursor = connection.cursor()
+
+  sql = "SELECT * FROM Trucks WHERE provider_id = %s;"
+  val = (provider_id,)
+  cursor.execute(sql, val)
+  return cursor.fetchall()
 
 def create_truck(connection, number_plate, provider_id):
   cursor = connection.cursor()

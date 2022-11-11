@@ -8,6 +8,9 @@ services:
     command: 'sh -c "sleep 15 ; python3 /app/Billing.py"'
     ports:
       - 8000:5000
+    environment:
+      WEIGHT_ADDRESS: "http://104.154.189.213:3000"
+      # WEIGHT_ADDRESS: "http://192.168.8.112:3000"
     depends_on:
       - mysql
 
