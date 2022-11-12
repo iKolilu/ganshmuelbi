@@ -5,6 +5,7 @@ services:
     volumes:
       - ./src:/app
       - ./in:/in
+      - /tmp/cilogs:/tmp/cilogs
     command: 'sh -c "sleep 15 ; python3 /app/Billing.py"'
     ports:
       - 8000:5000

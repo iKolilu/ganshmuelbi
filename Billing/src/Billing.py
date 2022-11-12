@@ -1,5 +1,5 @@
 
-
+import logging
 import os
 
 import db
@@ -11,6 +11,8 @@ from library import get_date_range, make_error, make_success
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+logging.basicConfig(filename='/tmp/cilogs/record.log', level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+
 database = db.connect()
 
 
@@ -202,3 +204,4 @@ def health():
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0', port=5000)
+  app.logger.info('Server is Working')

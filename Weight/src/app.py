@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import logging
 from flask import Flask, render_template, request, Response, jsonify, abort, redirect, url_for, flash
 from lib.db import db
 import os
@@ -8,16 +8,14 @@ import mimetypes as mt
 import pandas as pd
 
 #database base
-base = db(
-    host='mysqldb', port=3306,
-    username='root', password='123@admin',
-    database='weight'
-)
+base = db('mysqldb',3306,'root','123@admin','weight')
 
 app = Flask('__main__', template_folder='templates')
 
+
 logging.basicConfig(filename='/tmp/cilogs/record.log', level=logging.DEBUG,
                     format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+
 
 @app.errorhandler(404)
 def resouce_not_found(error):
@@ -45,6 +43,7 @@ def home():
 @app.route("/weight/", methods=["GET"])
 def get_weight():
     # print(id)
+    #base = db('mysqldb',3306,'root','123@admin','weight')
     from_ = request.args.get('from')
     to_ = request.args.get('to')
     f_ = request.args.get('filter')
@@ -82,11 +81,7 @@ def get_weight():
 
 @app.route('/weight/', methods=["POST"])
 def weight():
-    base = db(
-    host='mysqldb', port=3306,
-    username='root', password='123@admin',
-    database='weight'
-   )
+    #base = db('mysqldb',3306,'root','123@admin','weight')
     args = request.get_json()
     direction = args['direction'].lower()
     try:
@@ -176,6 +171,7 @@ def weight():
 
 @app.route("/batch-weight/", methods=["POST"])
 def batch_weight():
+    #base = db('mysqldb',3306,'root','123@admin','weight')
     args = request.get_json()
     filename = args['file']
     path = f'/in/{filename}'
@@ -215,6 +211,7 @@ def batch_weight():
 
 @app.route("/unknown/", methods=["GET"])
 def unknown():
+    #base = db('mysqldb',3306,'root','123@admin','weight')
     # Returns a list of all recorded containers that have unknown weight
     unknowns = base.get_unknowns()
     return jsonify(unknowns), 200
@@ -222,6 +219,7 @@ def unknown():
 
 @app.route("/item/<id>/", methods=["GET"])
 def item(id):
+    #base = db('mysqldb',3306,'root','123@admin','weight')
     from_ = request.args.get('from')
     to_ = request.args.get('to')
 
@@ -257,7 +255,7 @@ def item(id):
 
 @app.route("/session/<id>/", methods=["GET"])
 def session(id):
-
+    #base = db('mysqldb',3306,'root','123@admin','weight')
     exists = base.session_exists(id)
     if not exists:
         return Response('session not available', 404)
