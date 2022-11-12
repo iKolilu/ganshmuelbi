@@ -175,17 +175,17 @@ def bill_get(provider_id):
     _to = request.args.get('to')
     dates = get_date_range(_from, _to)
 
-    print(f"dates -> {dates}")
+    # print(f"dates -> {dates}")
     
     # find provider
     provider = db.get_provider(database, provider_id)
-    print(f"provider -> {provider}")
+    # print(f"provider -> {provider}")
     if provider == None:
       return make_error(404, 'Provider does not exist')
 
     # get trucks
     trucks = db.get_truck_for_provider(database, provider_id)
-    print(f"trucks -> {trucks}")
+    # print(f"trucks -> {trucks}")
 
     #  get session IDs for trucks
     sessions = []
@@ -201,7 +201,7 @@ def bill_get(provider_id):
     weights = weight_server.get_weight(dates)
 
     products = {}
-    print(f"weight -> {weights}")
+    # print(f"weight -> {weights}")
 
     totals = 0
     for weight in weights:
@@ -210,10 +210,10 @@ def bill_get(provider_id):
         # get session data for weight
         try:
           session = weight_server.get_session(weight['id'])
-          print(f"session -> {session}")
+          # print(f"session -> {session}")
           
           rate = db.get_rate_for_product(database, provider_id, weight['produce'])
-          print(f"rate -> {rate}")
+          # print(f"rate -> {rate}")
 
           if weight['produce'] in products.keys():
             products[weight['produce']]['count'] += 1
