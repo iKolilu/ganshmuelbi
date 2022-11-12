@@ -1,5 +1,4 @@
 
-
 import logging
 import os
 
@@ -12,7 +11,9 @@ from library import get_date_range, make_error, make_success
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+
 logging.basicConfig(filename='/tmp/cilogs/b_record.log', level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+
 database = db.connect()
 
 
