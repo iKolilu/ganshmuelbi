@@ -4,6 +4,7 @@ services:
     build: .
     volumes:
       - $PWD/in:/in
+      - /tmp/cilogs:/tmp/cilogs
     expose:
       - "9090"
     ports:
