@@ -146,3 +146,14 @@ def update_truck(connection, number_plate, provider_id):
   connection.commit()
   
   return number_plate
+
+def clear_provider_table(connection):
+  cursor = connection.cursor()
+
+  sql = "TRUNCATE Provider;"
+  cursor.execute(sql)
+  connection.commit()
+
+  sql_2 = "ALTER TABLE Provider AUTO_INCREMENT = 10001;"
+  cursor.execute(sql_2)
+  connection.commit() 
