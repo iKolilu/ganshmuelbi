@@ -5,7 +5,7 @@ services:
     volumes:
       - ./src:/app
       - ./in:/in
-      - ~/ourci/applogs:/app/tmp
+      - ~/ourci/applogs:docker-entrypoint-initdb.d/tmp
     command: 'sh -c "sleep 15 ; python3 /app/Billing.py"'
     ports:
       - 8000:5000
