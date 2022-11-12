@@ -25,6 +25,12 @@ def home():
 
 
 
+@app.route("/ui")
+def ui():
+  return render_template("ui.html")
+
+
+
 @app.route("/provider", methods=["POST"])
 def provider_create():
   new_name = request.json.get('name')
@@ -255,5 +261,5 @@ def health():
   return make_response("Failure", 500)
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=5000, debug=True)
+  app.run(host='0.0.0.0', port=5000, debug=True) # ! TODO remove debug
   app.logger.info('Server is Working')
