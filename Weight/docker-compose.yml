@@ -4,7 +4,7 @@ services:
     build: .
     volumes:
       - $PWD/in:/in
-      - ~/ourci/applogs:/app/tmp
+      - ~/ourci/applogs:/tmp
     expose:
       - "9090"
     ports:
