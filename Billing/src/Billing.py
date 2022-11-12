@@ -2,6 +2,7 @@
 
 import logging
 import os
+from os.path import exists
 
 import db
 import openpyxl
@@ -16,40 +17,67 @@ logging.basicConfig(filename='/tmp/cilogs/b_record.log', level=logging.DEBUG, fo
 database = db.connect()
 
 
+
 @app.route("/")
 def home():
-  return render_template("index.html")
+  return "Welcome to GanShmuel Billing Server"
 
-@app.route("/test_route")
-def test_route():
-  return jsonify({'message': 'Hello, world!'})
+
 
 @app.route("/provider", methods=["POST"])
 def provider_create():
   new_name = request.json.get('name')
   provider_id = db.create_provider(database, new_name)
-  return make_success({"id": provider_id})
+  new_provider = db.get_provider(database, provider_id)
+  return make_success({"id": new_provider[0], "name": new_provider[1]})
+
+
 
 @app.route("/provider/<id>", methods=["PUT"])
 def provider_update(id):
   new_name = request.json.get('name')
   db.update_provider(database, id, new_name)
-  return make_success({"id": id, "name": new_name})
+  new_provider = db.get_provider(database, id)
+  return make_success({"id": new_provider[0], "name": new_provider[1]})
 
 
 
 @app.route("/rates", methods=["GET"])
 def rates_get():
-  dir_name = os.path.join("/in", 'rates.xlsx')
+  store_path = "/in/store.txt"
+  if not exists(store_path):
+    return make_error(500, 'File has not yet been uploaded')
 
-  return send_file(dir_name, mimetype='xlsx')
+  file = None
+  with open(store_path, 'r') as store_reader:
+    file = store_reader.read()
+  
+  if file == None:
+    return make_error(500, 'File has not yet been uploaded')
+
+  file_name = os.path.join("/in", file)
+
+  if not exists(file_name):
+    return make_error(500, 'File specified does not exist')
+
+  return send_file(file_name, as_attachment=True, mimetype='application/vnd.ms-excel', download_name=file)
 
 
 
 @app.route("/rates", methods=["POST"])
 def rates_create():
   try:
-    dataframe = openpyxl.load_workbook("/in/rates.xlsx")
+    file_name = request.json.get('file')
+    file = f"/in/{file_name}"
+
+    if not exists(file):
+      return make_error(500, 'File specified does not exist')
+
+    # store file name
+    with open("/in/store.txt", 'w') as store_reader:
+      store_reader.write(file_name)
+
+    dataframe = openpyxl.load_workbook(file)
     dataframe1 = dataframe.active
     
     testArray = []
@@ -82,21 +110,42 @@ def rates_create():
   
     
 
-
 @app.route("/truck", methods=["POST"])
 def truck_create():
   number_plate = request.json.get('number_plate')
   provider_id = request.json.get('provider_id')
-  truck = db.create_truck(database, number_plate, provider_id)
-  return make_success({"id": truck})
+
+  provider = db.get_provider(database, provider_id)
+  if provider == None:
+    return make_error(404, "Provider ID does not exist")
+
+  truck = db.get_truck(database, number_plate)
+  if truck != None:
+    return make_error(404, "Truck ID already exist")
+
+  db.create_truck(database, number_plate, provider_id)
+  truck = db.get_truck(database, number_plate)
+  return make_success({"id": truck[0], "provider_id": truck[1]})
+
+
 
 @app.route("/truck/<id>", methods=["PUT"])
 def truck_update(id):
   provider_id = request.json.get('provider_id')
-  
-  truck = db.update_truck(database, id, provider_id)
-  
-  return make_success({"id": truck, "provider_id": provider_id})
+
+  truck = db.get_truck(database, id)
+  if truck == None:
+    return make_error(404, "Truck ID does not exist")
+
+  provider = db.get_provider(database, provider_id)
+  if provider == None:
+    return make_error(404, "Provider ID does not exist")
+
+  db.update_truck(database, id, provider_id)
+  truck = db.get_truck(database, id)
+  return make_success({"id": truck[0], "provider_id": truck[1]})
+
+
 
 @app.route("/truck/<id>", methods=["GET"])
 def truck_get(id):
@@ -107,16 +156,16 @@ def truck_get(id):
 
   # check db first
   truck = db.get_truck(database, id)
-
   if not truck:
-    return make_error(404, 'not found')
+    return make_error(404, "Truck ID does not exist")
 
-  truck_data = weight_server.get_item(id, dates)
+  try:
+    truck_data = weight_server.get_item(id, dates)
+    return make_success(truck_data)
+  except Exception as ex:
+    return make_error(500, str(ex))
 
-  if not truck_data:
-    return make_error(404, 'not found')
 
-  return make_success(truck_data)
 
 @app.route("/bill/<provider_id>", methods=["GET"])
 def bill_get(provider_id):
@@ -131,17 +180,7 @@ def bill_get(provider_id):
     provider = db.get_provider(database, provider_id)
     print(f"provider -> {provider}")
     if provider == None:
-      return make_error(400, 'provider does not exist')
-
-  # # ! test
-    # try:
-    #   return weight_server.get_item(provider_id, dates)
-    # except:
-    #   pass
-  #   rate = db.get_rate_for_product(database, '10044', 'Mandarin')
-  #   print(f"rate -> {rate}")
-  #   return make_success(rate)
-  # # ! test
+      return make_error(404, 'Provider does not exist')
 
     # get trucks
     trucks = db.get_truck_for_provider(database, provider_id)
@@ -150,33 +189,45 @@ def bill_get(provider_id):
     #  get session IDs for trucks
     sessions = []
     for truck in trucks:
-      truck_data = weight_server.get_item(truck[0], dates)
-      for sess in truck_data['sessions']:
-        sessions.append(sess)
-
-
+      try:
+        truck_data = weight_server.get_item(truck[0], dates)
+        for sess in truck_data['sessions']:
+          sessions.append(sess)
+      except:
+        pass
+      
     # get weights, and filter sessions
     weights = weight_server.get_weight(dates)
 
     products = {}
-    print(f"sess -> {weights}")
-    for sess in weights:
+    print(f"weight -> {weights}")
 
-      if sess['id'] in sessions:
-        rate = db.get_rate_for_product(database, provider_id, sess['produce'])
+    totals = 0
+    for weight in weights:
 
-        # if products[sess['produce']] == None:
-        if sess['produce'] in products.keys():
-          products[sess['produce']]['count'] += 1
-        else:
-          prod = {
-            "product": sess['produce'],
-            "count": 1,
-            "amount": sess['neto'],
-            "rate": rate,
-            "pay": sess['neto'] * rate,
-          }
-          products[sess['produce']] = prod
+      if weight['id'] in sessions:
+        # get session data for weight
+        try:
+          session = weight_server.get_session(weight['id'])
+          print(f"session -> {session}")
+          
+          rate = db.get_rate_for_product(database, provider_id, weight['produce'])
+          print(f"rate -> {rate}")
+
+          if weight['produce'] in products.keys():
+            products[weight['produce']]['count'] += 1
+          else:
+            prod = {
+              "product": weight['produce'],
+              "count": 1,
+              "amount": session['neto'],
+              "rate": rate,
+              "pay": session['neto'] * rate,
+            }
+            products[weight['produce']] = prod
+            totals += session['neto'] * rate
+        except Exception as ex:
+          return make_error(500, str(ex))
       
 
     result = {
@@ -187,7 +238,7 @@ def bill_get(provider_id):
       "truckCount": len(trucks),
       "sessionCount": len(sessions),
       "products": list(products.values()),
-      "total": 0 # ! TODO
+      "total": totals
     }
 
     return make_success(result)
@@ -203,5 +254,5 @@ def health():
   return make_response("Failure", 500)
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=5000)
+  app.run(host='0.0.0.0', port=5000, debug=True)
   app.logger.info('Server is Working')
