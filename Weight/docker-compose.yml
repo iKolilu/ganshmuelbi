@@ -4,6 +4,7 @@ services:
     build: .
     volumes:
       - $PWD/in:/in
+      - ~/ourci/applogs:/app/tmp
     expose:
       - "9090"
     ports:
@@ -13,7 +14,7 @@ services:
         condition: service_healthy
 
   mysqldb:
-    image: mysql:5.7
+    image: mysql:8
     volumes:
       - db-data:/var/lib/mysql
       - ./dump:/docker-entrypoint-initdb.d:ro
