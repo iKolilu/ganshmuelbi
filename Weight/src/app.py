@@ -10,7 +10,7 @@ import pandas as pd
 base = db('mysqldb',3306,'root','123@admin','weight')
 
 app = Flask('__main__', template_folder='templates')
-logging.basicConfig(filename='~/ourci/applogs/record.log', level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+logging.basicConfig(filename='/tmp/record.log', level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
 @app.errorhandler(404)
 def resouce_not_found(error):
