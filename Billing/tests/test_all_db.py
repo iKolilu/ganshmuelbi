@@ -2,7 +2,7 @@ import pytest
 
 
 
-from db import get_provider, create_provider, connect, clear_provider_table
+from db import get_provider, create_provider, connect, clear_provider_table, clear_a_record_provider_table
 
 connection=connect()
 
@@ -15,11 +15,11 @@ def test_get_provider():
 
 
     new_user=None 
-    new_user=get_provider(connection, "DonSimon")
+    new_user=get_provider(connection, "DonSimonk")
 
 
-    assert new_user is not None
-    assert new_user == "Not implemented"
+    assert new_user is  None
+    # assert new_user == "Not implemented"
 
     # assert "a"=="b" is True
     # assert new_user == "Not implemented here "
@@ -36,7 +36,7 @@ def test_create_provider():
 
     print("####Started tests########")
     new_user=None 
-    clear_provider_table(connection)
+    clear_a_record_provider_table(connection)
 
     test_name="kofi"
     new_user=create_provider(connection,test_name)
@@ -47,6 +47,5 @@ def test_create_provider():
 
     assert new_user == 10001
 
-    clear_provider_table(connection)
 
     print("######### . Record inserted, Database Test Passed ############") 
