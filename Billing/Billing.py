@@ -11,7 +11,7 @@ from flask import (Flask, jsonify, make_response, render_template, request,
 from library import get_date_range, make_error, make_success
 from werkzeug.utils import secure_filename
 
-
+database = db.connect()
 
 
 def create_app():
@@ -19,7 +19,7 @@ def create_app():
 
   logging.basicConfig(filename='/tmp/cilogs/b_record.log', level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
-  database = db.connect()
+  
 
 
 
