@@ -7,8 +7,8 @@ import logging
 import mimetypes as mt
 import pandas as pd
 
-#database base
-base = db('mysqldb',3306,'root','123@admin','weight')
+# database base
+base = db('mysqldb', 3306, 'root', '123@admin', 'weight')
 
 app = Flask('__main__', template_folder='templates')
 
@@ -174,7 +174,7 @@ def batch_weight():
     #base = db('mysqldb',3306,'root','123@admin','weight')
     args = request.get_json()
     filename = args['file']
-    path = f'/in/{filename}'
+    path = f'/app/in/{filename}'
     path = os.path.normpath(path)
     df = None
     multiplier = 1.0
