@@ -1,9 +1,10 @@
 version: '3.1'
+
 services:
   app:
     build: . 
     volumes:
-      - ./src:/app
+      - .:/app
       - ./in:/in
       - /tmp/cilogs:/tmp/cilogs
     command: 'sh -c "sleep 15 ; python3 /app/Billing.py"'
@@ -11,7 +12,6 @@ services:
       - 8000:5000
     environment:
       WEIGHT_ADDRESS: "http://104.154.189.213:3000"
-      # WEIGHT_ADDRESS: "http://192.168.8.112:3000"
     depends_on:
       - mysql
 

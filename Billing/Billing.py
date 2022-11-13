@@ -42,9 +42,14 @@ def provider_create():
 
 @app.route("/provider/<id>", methods=["PUT"])
 def provider_update(id):
+  provider = db.get_provider(database, id)
+  if provider == None:
+    return make_error(404, "Provider ID does not exist")
+
   new_name = request.json.get('name')
   db.update_provider(database, id, new_name)
   new_provider = db.get_provider(database, id)
+
   return make_success({"id": new_provider[0], "name": new_provider[1]})
 
 
@@ -74,7 +79,7 @@ def rates_get():
 @app.route("/rates", methods=["POST"])
 def rates_create():
   try:
-    file_name = request.json.get('file')
+    file_name = request.json.get('name')
     file = f"/in/{file_name}"
 
     if not exists(file):
