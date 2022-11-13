@@ -266,5 +266,5 @@ def health():
   return make_response("Failure", 500)
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=5000, debug=True) # ! TODO remove debug
+  app.run(host='0.0.0.0', port=5000)
   app.logger.info('Server is Working')
