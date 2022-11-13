@@ -146,3 +146,39 @@ def update_truck(connection, number_plate, provider_id):
   connection.commit()
   
   return number_plate
+
+
+
+def clear_a_record_provider_table(connection):
+  cursor = connection.cursor()
+
+  sql = "DELETE FROM Provider WHERE id=10001;"
+  cursor.execute(sql)
+  connection.commit()
+
+  sql_2 = "ALTER TABLE Provider AUTO_INCREMENT = 10001;"
+  cursor.execute(sql_2)
+  connection.commit()
+  
+
+  # sql = "DELETE FROM Provider WHERE id=(SELECT MAX(id) FROM Provider);"
+
+  # sql_2 = "ALTER TABLE Provider AUTO_INCREMENT = (SELECT MAX(id) FROM Provider);"
+  
+
+
+  
+
+
+
+
+def clear_provider_table(connection):
+  cursor = connection.cursor()
+
+  sql = "TRUNCATE Provider;"
+  cursor.execute(sql)
+  connection.commit()
+
+  sql_2 = "ALTER TABLE Provider AUTO_INCREMENT = 10001;"
+  cursor.execute(sql_2)
+  connection.commit()
